@@ -1,6 +1,6 @@
 <template lang="pug">
   .column.is-12
-    h1.title(style="color: #f5f5f5") Yeni Komut
+    h1.title(style="color: #f5f5f5") Komut Düzenle
     .column.is-6.is-offset-3
       label.label {{ formTranslations.command.label }}
       p.control.has-icon.has-icon-left
@@ -43,7 +43,7 @@
             span.help(style="color: #ddd") {{ formTranslations.permissions.help }}
       p.control
         button.button.is-info(@click="toggleAdvancedSettings") {{ show_advanced_settings ? formTranslations.advanced_settings_button.hide : formTranslations.advanced_settings_button.show }}
-        button.button.is-success.is-pulled-right(@click="addCommand" :disabled="$v.$invalid || saving") {{ formTranslations.submit.value }}
+        button.button.is-success.is-pulled-right(@click="editCommand" :disabled="$v.$invalid || saving") {{ formTranslations.submit.value }}
       .box
         h1 {{ exampleWindowTranslations.title }}
         br
@@ -57,10 +57,10 @@
 
 <script>
 import { required, minLength } from 'vuelidate/lib/validators'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
-  name: 'new-component',
+  name: 'edit-component',
   data () {
     return {
       saving: false,
@@ -96,9 +96,26 @@ export default {
     }
   },
   mounted () {
+    let command = this.getCommandByName(this.$router.currentRoute.params.name)
+    if (command) {
+      this.form = {
+        enabled: command.enabled,
+        command: command.command,
+        text: command.text,
+        cooldown: command.cooldown,
+        permissions: command.permissions,
+        auto_repeat: command.auto_repeat,
+        repeat: command.repeat
+      }
+    } else {
+      this.$router.push({ name: 'commands' })
+    }
     this.checkCommandAvailability()
   },
   computed: {
+    ...mapGetters([
+      'getCommandByName'
+    ]),
     formTranslations () {
       return {
         command: {
@@ -163,13 +180,14 @@ export default {
   },
   methods: {
     ...mapActions({
-      addCommandAction: 'addCommand'
+      addCommandAction: 'addCommand',
+      editCommandAction: 'editCommand'
     }),
-    addCommand () {
+    editCommand () {
       // TODO: do saving process
       this.saving = true
       if (!this.$v.$invalid) {
-        this.addCommandAction(this.form)
+        this.editCommandAction(this.form)
         this.$notify.success({content: 'Kaydedildi!'})
         this.$router.push({ name: 'commands' })
       }

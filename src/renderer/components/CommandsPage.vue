@@ -26,7 +26,7 @@
               label.label Metin: {{ command.text }}
           .command-right
               p.control.has-addons
-                button.button.is-edit
+                button.button.is-edit(@click="editCommand(command)")
                   span.icon
                     i.fa.fa-edit
                 pop-confirm(ok-text="Evet" :show-cancel="false" content="Silmek istediğinize emin misiniz?" :on-ok="deleteCommand.bind(this, command)")
@@ -66,6 +66,10 @@ export default {
     deleteCommand (command) {
       this.removeCommand(command)
       this.$notify.success({ content: 'Komut silindi!' })
+    },
+    editCommand (command) {
+      console.log('edit command', command)
+      this.$router.push({ name: 'edit-command', params: { name: command.command } })
     }
   }
 }
@@ -171,7 +175,7 @@ export default {
     .down-right
       display: block
       position: relative
-      top: -45px
+      top: -46px
       &:before
         display: block
         position: relative

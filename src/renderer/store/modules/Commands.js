@@ -24,6 +24,7 @@ const mutations = {
 const actions = {
   addCommand ({ commit }, command) {
     let commands = settings.get('commands', [])
+    command.id = commands.length
     commands.push(command)
     settings.set('commands', commands)
     commit('setCommands', commands)
@@ -35,11 +36,28 @@ const actions = {
   removeCommand ({ commit }, command) {
     let commandKey = command.command || command
     commit('removeCommand', commandKey)
+  },
+  editCommand ({ commit }, command) {
+    let commands = settings.get('commands', [])
+    if (commands.length === 0) {
+      command.id = 1
+      commands.push(command)
+    } else {
+      for (var i = 0; i < commands.length; i++) {
+        if (commands[i].id === command.id) {
+          commands[i] = command
+          break
+        }
+      }
+    }
+    settings.set('commands', commands)
+    commit('setCommands', commands)
   }
 }
 
 const getters = {
-  getCommands: state => state.commands
+  getCommands: state => state.commands,
+  getCommandByName: state => name => state.commands.filter(command => command.command === name).slice()[0]
 }
 
 export default {

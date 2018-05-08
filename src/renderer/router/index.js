@@ -28,6 +28,13 @@ export default new Router({
           meta: {
             breadcrumb: 'Yeni Komut'
           }
+        }, {
+          name: 'edit-command',
+          path: ':name/edit',
+          component: require('@/components/CommandsPage/EditCommand').default,
+          meta: {
+            breadcrumb: 'Düzenle'
+          }
         }
       ]
     },
