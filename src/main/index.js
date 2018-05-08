@@ -1,6 +1,8 @@
 'use strict'
 
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
+import { TMIClient } from './twitch'
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -33,6 +35,7 @@ function createWindow () {
 
 app.on('ready', () => {
   createWindow()
+  let client = new TMIClient()
 })
 
 app.on('window-all-closed', () => {

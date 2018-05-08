@@ -171,7 +171,7 @@ export default {
     .down-right
       display: block
       position: relative
-      top: -45px
+      top: -46px
       &:before
         display: block
         position: relative
