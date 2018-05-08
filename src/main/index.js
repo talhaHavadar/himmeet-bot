@@ -1,6 +1,8 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
+import { Himmeet } from './twitch'
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -33,6 +35,13 @@ function createWindow () {
 
 app.on('ready', () => {
   createWindow()
+  let himmeet = new Himmeet()
+  /*
+  himmeet.client.on('chat', (channel, userstate, message, self) => {
+    console.log(channel, userstate, message, self)
+  })
+  */
+  console.log('enabled commands in himmeet', himmeet.enabledCommands)
 })
 
 app.on('window-all-closed', () => {

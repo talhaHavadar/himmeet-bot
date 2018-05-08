@@ -1,4 +1,5 @@
 import settings from 'electron-settings'
+import { ipcRenderer } from 'electron'
 
 const state = {
   commands: []
@@ -6,6 +7,8 @@ const state = {
 
 const mutations = {
   setCommands (state, commands) {
+    settings.set('commands', commands)
+    ipcRenderer.send('commands_updated')
     state.commands = commands
   },
   removeCommand (state, commandKey) {
@@ -26,7 +29,6 @@ const actions = {
     let commands = settings.get('commands', [])
     command.id = commands.length
     commands.push(command)
-    settings.set('commands', commands)
     commit('setCommands', commands)
   },
   refreshCommands ({ commit }) {
