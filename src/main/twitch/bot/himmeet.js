@@ -16,7 +16,10 @@ export default class Himmeet {
     }.bind(this))
 
     this.client.on('chat', (channel, userstate, message, self) => {
-      this.commandHandler.handleMessage(userstate, message)
+      let command = this.commandHandler.handleMessage(userstate, message)
+      if (command) {
+        this.client.action(channel, command.text)
+      }
     })
   }
 

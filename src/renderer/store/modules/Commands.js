@@ -27,7 +27,7 @@ const mutations = {
 const actions = {
   addCommand ({ commit }, command) {
     let commands = settings.get('commands', [])
-    command.id = commands.length
+    command.id = commands.length + 1
     commands.push(command)
     commit('setCommands', commands)
   },

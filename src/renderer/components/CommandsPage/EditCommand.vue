@@ -99,6 +99,7 @@ export default {
     let command = this.getCommandByName(this.$router.currentRoute.params.name)
     if (command) {
       this.form = {
+        id: command.id,
         enabled: command.enabled,
         command: command.command,
         text: command.text,
@@ -184,7 +185,6 @@ export default {
       editCommandAction: 'editCommand'
     }),
     editCommand () {
-      // TODO: do saving process
       this.saving = true
       if (!this.$v.$invalid) {
         this.editCommandAction(this.form)

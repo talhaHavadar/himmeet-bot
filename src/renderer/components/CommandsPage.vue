@@ -68,7 +68,6 @@ export default {
       this.$notify.success({ content: 'Komut silindi!' })
     },
     editCommand (command) {
-      console.log('edit command', command)
       this.$router.push({ name: 'edit-command', params: { name: command.command } })
     }
   }
