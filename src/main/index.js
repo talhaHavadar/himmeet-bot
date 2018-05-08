@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
-import { TMIClient } from './twitch'
+import { Himmeet } from './twitch'
 
 /**
  * Set `__static` path to static files in production
@@ -35,7 +35,13 @@ function createWindow () {
 
 app.on('ready', () => {
   createWindow()
-  let client = new TMIClient()
+  let himmeet = new Himmeet()
+  /*
+  himmeet.client.on('chat', (channel, userstate, message, self) => {
+    console.log(channel, userstate, message, self)
+  })
+  */
+  console.log('enabled commands in himmeet', himmeet.enabledCommands)
 })
 
 app.on('window-all-closed', () => {

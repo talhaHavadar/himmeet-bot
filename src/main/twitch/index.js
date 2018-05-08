@@ -1,9 +1,8 @@
-import tmi from 'tmi.js'
 import config from './config'
+import { Himmeet, CommandHandler } from './bot'
 
-let TMIClient = tmi.client
-
-
-export default {
-    TMIClient, config
+export {
+  Himmeet,
+  CommandHandler,
+  config
 }
