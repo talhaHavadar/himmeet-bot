@@ -22,15 +22,15 @@ class CommandHandler {
     return command.permissions.filter(permission => permission.name === userGroup).length > 0
   }
 
-  isCommandAvailableToUse (user, command) {
+  isCommandAvailableToUse (command) {
     if (command.enabled === false) {
       this.log('Command is not enabled ' + command)
       return false
     }
-    
+
     let commandCooldownInMs = command.cooldown * 60 * 1000
     this.log('Command last_used_timestamp: ' + command.last_used_timestamp + ' Date.now: ' + Date.now())
-    
+
     if (command.last_used_timestamp && (Date.now() - command.last_used_timestamp) < commandCooldownInMs) {
       this.log('Command is not able to use due to cooldown')
       return false
@@ -52,7 +52,7 @@ class CommandHandler {
       for (var i = 0; i < this.commands.length; i++) {
         let command = this.commands[i]
         if (command.command === commandName) {
-          if (this.isCommandAvailableToUse(sender, command) && this.isUserGrantedToUseCommand(sender, command)) {
+          if (this.isCommandAvailableToUse(command) && this.isUserGrantedToUseCommand(sender, command)) {
             command.last_used_timestamp = Date.now()
             return command
           }
