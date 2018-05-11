@@ -21,6 +21,7 @@ const mutations = {
     }
     state.commands = commands
     settings.set('commands', commands)
+    ipcRenderer.send('commands_updated')
   }
 }
 

@@ -44,6 +44,18 @@ class CommandHandler {
     }
   }
 
+  handleAutoRepeatCommands (timeInMinutes) {
+    let results = []
+    for (var i = 0; i < this.commands.length; i++) {
+      let command = this.commands[i]
+      if (command.auto_repeat && (timeInMinutes % command.repeat.minutes) === 0 && this.isCommandAvailableToUse(command)) {
+        // TODO: consider lines restricition for auto_repeat commands
+        results.push(command)
+      }
+    }
+    return results
+  }
+
   handleMessage (sender, message) {
     this.log('Handle Message: <Sender: ' + sender + ', Message: ' + message)
     let matched = this.commandExtractionRegex.exec(message)

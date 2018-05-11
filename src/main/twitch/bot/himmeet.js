@@ -3,6 +3,7 @@ import config from '../config'
 import { CommandHandler } from './handlers'
 import settings from 'electron-settings'
 import { ipcMain } from 'electron'
+import { setTimeout } from 'timers'
 
 export default class Himmeet {
   constructor (commandHandler) {
@@ -34,24 +35,18 @@ export default class Himmeet {
   }
 
   checkAutoRepeatCommands () {
-    this.runAgain = () => {
+    // TODO: add check for existence of auto_repeat command
+    this.timer = setTimeout(function runAgain () {
       this.timeInMinutes++
-      this.enabledAutoRepeatCommands.forEach(command => {
-        if ((this.timeInMinutes % command.repeat.minutes) === 0 && this.commandHandler.isCommandAvailableToUse(command)) {
-          // TODO: also consider the lines restriciton for repeated commands
-          this.client.action('javadar', command.text)
-        }
+      let commands = this.commandHandler.handleAutoRepeatCommands(this.timeInMinutes)
+      commands.forEach(cmd => {
+        this.client.action('javadar', cmd.text)
       })
-      setTimeout(this.runAgain, 60000)
-    }
-    this.runAgain()
+      setTimeout(runAgain.bind(this), 60000)
+    }.bind(this), 60000)
   }
 
   get enabledCommands () {
     return this.commands.filter(command => command.enabled)
-  }
-
-  get enabledAutoRepeatCommands () {
-    return this.commands.filter(command => command.enabled && command.auto_repeat)
   }
 }
