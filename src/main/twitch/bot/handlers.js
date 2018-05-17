@@ -28,7 +28,7 @@ class CommandHandler {
       return false
     }
 
-    let commandCooldownInMs = command.cooldown * 60 * 1000
+    let commandCooldownInMs = command.cooldown * 1000
     this.log('Command last_used_timestamp: ' + command.last_used_timestamp + ' Date.now: ' + Date.now())
 
     if (command.last_used_timestamp && (Date.now() - command.last_used_timestamp) < commandCooldownInMs) {
