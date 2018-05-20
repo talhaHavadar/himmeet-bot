@@ -6,7 +6,8 @@ class PlaceholderHelper {
   static getPlaceholders () {
     return {
       user: new Placeholder('user', function (sender) {
-        return new Promise(resolve => resolve(sender.display_name))
+        console.log(sender)
+        return new Promise(resolve => resolve(sender['display-name']))
       }),
       uptime: new Placeholder('uptime', function () {
         return axios.get('https://api.twitch.tv/kraken/streams/' + config.channel, {
@@ -18,14 +19,22 @@ class PlaceholderHelper {
             let now = Date.now()
             let createdAt = new Date(res.data.stream.created_at)
             let diffInMinutes = (now - createdAt) / 1000 / 60
-            return diffInMinutes
+            let mins = diffInMinutes % 60
+            let hours = Math.floor(diffInMinutes / 60)
+            return hours + ' saat ' + mins + ' dakikadır'
           }
         })
       })
     }
   }
 
-  static renderCommandText (command) {
+  static renderCommandText (command, sender) {
+    if (!command) {
+      return new Promise(resolve => undefined)
+    }
+    if (!command.text) {
+      return new Promise(resolve => '')
+    }
     let promises = []
     let placeholders = PlaceholderHelper.getPlaceholders()
     let placeholderRegex = /\{\{([^\s]*)\}\}/gim
@@ -36,7 +45,7 @@ class PlaceholderHelper {
         let candidate = placeholderCandidates[i]
         let key = candidate.replace('{{', '').replace('}}', '')
         if (key in placeholders) {
-          promises.push(placeholders[key].action().then(res => {
+          promises.push(placeholders[key].action(sender).then(res => {
             message = message.replace(candidate, res)
           }))
         }

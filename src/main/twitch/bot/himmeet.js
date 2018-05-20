@@ -21,7 +21,7 @@ export default class Himmeet {
       let command = this.commandHandler.handleMessage(userstate, message)
       if (command) {
         if (PlaceholderHelper.hasPlaceholder(command.text)) {
-          PlaceholderHelper.renderCommandText(command).then(res => {
+          PlaceholderHelper.renderCommandText(command, userstate).then(res => {
             this.client.action(channel, res)
           })
         } else {
