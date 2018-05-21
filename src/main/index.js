@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { Himmeet, PlaceholderHelper } from './twitch'
+import { Himmeet, PlaceholderHelper, CommandArgumentHelper } from './twitch'
 
 /**
  * Set `__static` path to static files in production
@@ -43,6 +43,7 @@ app.on('ready', () => {
     } else if (!command.text) {
       e.returnValue = ''
     } else {
+      command.placeholders = CommandArgumentHelper.getArguments(command, sender.message.replace(/^!.*?(\s|$)/gmi, ''))
       PlaceholderHelper.renderCommandText(command, sender, options).then(res => {
         e.returnValue = res
       })

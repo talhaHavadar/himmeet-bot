@@ -35,10 +35,10 @@ class PlaceholderHelper {
 
   static renderCommandText (command, sender, options) {
     if (!command) {
-      return new Promise(resolve => undefined)
+      return new Promise(resolve => resolve(undefined))
     }
     if (!command.text) {
-      return new Promise(resolve => '')
+      return new Promise(resolve => resolve(''))
     }
     let promises = []
     let placeholders = PlaceholderHelper.getPlaceholders()
@@ -49,7 +49,11 @@ class PlaceholderHelper {
       for (var i = 0; i < placeholderCandidates.length; i++) {
         let candidate = placeholderCandidates[i]
         let key = candidate.replace('{{', '').replace('}}', '')
-        if (key in placeholders) {
+        if (key in command.placeholders) {
+          promises.push(command.placeholders[key].action(sender, options.sandbox).then(res => {
+            message = message.replace(candidate, res)
+          }).catch(res => undefined))
+        } else if (key in placeholders) {
           promises.push(placeholders[key].action(sender, options.sandbox).then(res => {
             message = message.replace(candidate, res)
           }).catch(res => undefined))
@@ -79,20 +83,20 @@ class CommandArgumentHelper {
   static getArguments (cmdObj, message) {
     let command = cmdObj.command
     let cmdArguments = command.match(/\{\{([^\s]*)\}\}/gim)
-    let result = []
-    if (cmdArguments && message) {
-      let args = message.split(command)[1].trim().split(/\s*/)
+    let result = {}
+    if (cmdArguments) {
+      let args = message.trim().split(/\s+/)
       for (var i = 0; i < cmdArguments.length; i++) {
         var argument
         var defaultValue
         [argument, defaultValue] = cmdArguments[i].replace('{{', '').replace('}}', '').split(':')
         if (i < args.length) {
           if (args[i] && args[i] !== '') {
-            result.push(new CommandArgument(argument, args[i]))
+            result[argument] = new CommandArgument(argument, args[i])
             continue
           }
         }
-        result.push(new CommandArgument(argument, defaultValue))
+        result[argument] = new CommandArgument(argument, defaultValue)
       }
     }
     return result

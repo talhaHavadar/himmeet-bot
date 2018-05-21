@@ -5,6 +5,13 @@ class Placeholder {
   }
 }
 
+class CommandArgument extends Placeholder {
+  constructor (name, value) {
+    super(name, (sender, options) => new Promise((resolve) => resolve(value)))
+  }
+}
+
 export {
-  Placeholder
+  Placeholder,
+  CommandArgument
 }

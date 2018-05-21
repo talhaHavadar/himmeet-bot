@@ -49,7 +49,7 @@
         br
         p
           span(style="color: blue;font-weight: bold") SomeoneElse: 
-            span(style="color: black; font-weight: 400") &excl;{{form.command}}
+            span(style="color: black; font-weight: 400") &excl;{{renderedCommandCommand}}
         p
           span(style="color: red; font-weight: bold") Himmeet: 
             span(style="color: black; font-weight: 400") {{rendered_command_text}}
@@ -161,6 +161,9 @@ export default {
     },
     unselectedPermissions () {
       return this.form.permissions.filter(userGroup => !userGroup.selected)
+    },
+    renderedCommandCommand () {
+      return this.form.command.replace(/\{\{.*?\}\}/gmi, 'orn.Arguman')
     }
   },
   methods: {
@@ -179,7 +182,12 @@ export default {
     },
     commandTextChanged () {
       this.$v.form.text.$touch()
-      this.rendered_command_text = ipcRenderer.sendSync('render_command_text', this.form, { 'display-name': 'SomeoneElse' }, { sandbox: true })
+      this.rendered_command_text = ipcRenderer.sendSync('render_command_text', this.form,
+        {
+          message: '!' + this.form.command.replace(/\{\{.*?\}\}/gmi, 'orn.Arguman'),
+          'display-name': 'SomeoneElse'
+        },
+        { sandbox: true })
     },
     checkCommandAvailability () {
       this.$v.form.command.$touch()
