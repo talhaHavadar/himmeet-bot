@@ -1,7 +1,7 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
-import { Himmeet } from './twitch'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { Himmeet, PlaceholderHelper } from './twitch'
 
 /**
  * Set `__static` path to static files in production
@@ -36,7 +36,19 @@ function createWindow () {
 app.on('ready', () => {
   createWindow()
   let himmeet = new Himmeet()
-  console.log('enabled commands in himmeet', himmeet.enabledCommands)
+  console.log(himmeet)
+  ipcMain.on('render_command_text', (e, command, sender) => {
+    console.log('render_command_text', command)
+    if (!command) {
+      e.returnValue = ''
+    } else if (!command.text) {
+      e.returnValue = ''
+    } else {
+      PlaceholderHelper.renderCommandText(command, sender).then(res => {
+        e.returnValue = res
+      })
+    }
+  })
 })
 
 app.on('window-all-closed', () => {

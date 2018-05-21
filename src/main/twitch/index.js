@@ -1,8 +1,9 @@
 import config from './config'
-import { Himmeet, CommandHandler } from './bot'
+import { Himmeet, CommandHandler, PlaceholderHelper } from './bot'
 
 export {
   Himmeet,
   CommandHandler,
-  config
+  config,
+  PlaceholderHelper
 }

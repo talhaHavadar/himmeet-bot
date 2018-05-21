@@ -12,7 +12,7 @@
         span.help.is-danger(v-if="!command_available && !$v.form.command.$invalid") {{ formTranslations.command.validations.duplicated }}
       label.label {{ formTranslations.text.label }}
       p.control
-        input.input(required type='text' :class="{ 'is-danger': $v.form.text.$error }" v-model="form.text" @input="$v.form.text.$touch()" :placeholder='formTranslations.text.placeholder')
+        input.input(required type='text' :class="{ 'is-danger': $v.form.text.$error }" v-model="form.text" @input="commandTextChanged()" :placeholder='formTranslations.text.placeholder')
         span.help.is-danger(v-if="!$v.form.text.required") {{ formTranslations.text.validations.required }}
         span.help.is-danger(v-if="!$v.form.text.minLength") {{ formTranslations.text.validations.minLength }}
       p.control
@@ -52,12 +52,13 @@
             span(style="color: black; font-weight: 400") &excl;{{form.command}}
         p
           span(style="color: red; font-weight: bold") Himmeet: 
-            span(style="color: black; font-weight: 400") {{form.text}}
+            span(style="color: black; font-weight: 400") {{rendered_command_text}}
 </template>
 
 <script>
 import { required, minLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+import { ipcRenderer } from 'electron'
 
 export default {
   name: 'edit-component',
@@ -67,6 +68,7 @@ export default {
       command_available: true,
       show_advanced_settings: false,
       selected_permission_in_selectbox: undefined,
+      rendered_command_text: '',
       form: {
         enabled: true,
         command: '',
@@ -192,6 +194,10 @@ export default {
         this.$router.push({ name: 'commands' })
       }
       this.saving = false
+    },
+    commandTextChanged () {
+      this.$v.form.text.$touch()
+      this.rendered_command_text = ipcRenderer.sendSync('render_command_text', this.form, { 'display-name': 'SomeoneElse' })
     },
     checkCommandAvailability () {
       this.$v.form.command.$touch()
