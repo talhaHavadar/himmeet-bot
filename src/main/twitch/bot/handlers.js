@@ -63,7 +63,7 @@ class CommandHandler {
       let commandName = matched[1]
       for (var i = 0; i < this.commands.length; i++) {
         let command = this.commands[i]
-        if (command.command === commandName) {
+        if (command.command.replace(/\{\{([^\s]*)\}\}/gim, '').trim() === commandName) {
           if (this.isCommandAvailableToUse(command) && this.isUserGrantedToUseCommand(sender, command)) {
             command.last_used_timestamp = Date.now()
             return command

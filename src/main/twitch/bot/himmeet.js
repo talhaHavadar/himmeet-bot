@@ -20,8 +20,9 @@ export default class Himmeet {
     this.client.on('chat', (channel, userstate, message, self) => {
       let command = this.commandHandler.handleMessage(userstate, message)
       if (command) {
-        console.log('Arguments', CommandArgumentHelper.getArguments(command, message))
-        if (PlaceholderHelper.hasPlaceholder(command.text)) {
+        command.placeholders = CommandArgumentHelper.getArguments(command, message.replace(/^!.*?(\s|$)/gmi, ''))
+        console.log(command.placeholders, message.replace(/^!.*?(\s|$)/gmi, ''))
+        if (PlaceholderHelper.hasPlaceholder(command.text) || Object.keys(command.placeholders).length > 0) {
           PlaceholderHelper.renderCommandText(command, userstate).then(res => {
             this.client.action(channel, res)
           })

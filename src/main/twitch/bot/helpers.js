@@ -34,6 +34,7 @@ class PlaceholderHelper {
   }
 
   static renderCommandText (command, sender, options) {
+    let sandbox = options ? options.sandbox : undefined
     if (!command) {
       return new Promise(resolve => resolve(undefined))
     }
@@ -50,11 +51,11 @@ class PlaceholderHelper {
         let candidate = placeholderCandidates[i]
         let key = candidate.replace('{{', '').replace('}}', '')
         if (key in command.placeholders) {
-          promises.push(command.placeholders[key].action(sender, options.sandbox).then(res => {
+          promises.push(command.placeholders[key].action(sender, sandbox).then(res => {
             message = message.replace(candidate, res)
           }).catch(res => undefined))
         } else if (key in placeholders) {
-          promises.push(placeholders[key].action(sender, options.sandbox).then(res => {
+          promises.push(placeholders[key].action(sender, sandbox).then(res => {
             message = message.replace(candidate, res)
           }).catch(res => undefined))
         }
