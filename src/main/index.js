@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { Himmeet, PlaceholderHelper } from './twitch'
+import { Himmeet, PlaceholderHelper, CommandArgumentHelper } from './twitch'
 
 /**
  * Set `__static` path to static files in production
@@ -37,14 +37,14 @@ app.on('ready', () => {
   createWindow()
   let himmeet = new Himmeet()
   console.log(himmeet)
-  ipcMain.on('render_command_text', (e, command, sender) => {
-    console.log('render_command_text', command)
+  ipcMain.on('render_command_text', (e, command, sender, options) => {
     if (!command) {
       e.returnValue = ''
     } else if (!command.text) {
       e.returnValue = ''
     } else {
-      PlaceholderHelper.renderCommandText(command, sender).then(res => {
+      command.placeholders = CommandArgumentHelper.getArguments(command, sender.message.replace(/^!.*?(\s|$)/gmi, ''))
+      PlaceholderHelper.renderCommandText(command, sender, options).then(res => {
         e.returnValue = res
       })
     }

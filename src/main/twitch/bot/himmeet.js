@@ -1,7 +1,7 @@
 import tmi from 'tmi.js'
 import config from '../config'
 import { CommandHandler } from './handlers'
-import { PlaceholderHelper } from './helpers'
+import { PlaceholderHelper, CommandArgumentHelper } from './helpers'
 import settings from 'electron-settings'
 import { ipcMain } from 'electron'
 import { setTimeout } from 'timers'
@@ -20,7 +20,8 @@ export default class Himmeet {
     this.client.on('chat', (channel, userstate, message, self) => {
       let command = this.commandHandler.handleMessage(userstate, message)
       if (command) {
-        if (PlaceholderHelper.hasPlaceholder(command.text)) {
+        command.placeholders = CommandArgumentHelper.getArguments(command, message.replace(/^!.*?(\s|$)/gmi, ''))
+        if (PlaceholderHelper.hasPlaceholder(command.text) || Object.keys(command.placeholders).length > 0) {
           PlaceholderHelper.renderCommandText(command, userstate).then(res => {
             this.client.action(channel, res)
           })
