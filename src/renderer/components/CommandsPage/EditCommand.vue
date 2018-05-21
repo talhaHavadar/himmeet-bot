@@ -197,7 +197,7 @@ export default {
     },
     commandTextChanged () {
       this.$v.form.text.$touch()
-      this.rendered_command_text = ipcRenderer.sendSync('render_command_text', this.form, { 'display-name': 'SomeoneElse' })
+      this.rendered_command_text = ipcRenderer.sendSync('render_command_text', this.form, { 'display-name': 'SomeoneElse' }, { sandbox: true })
     },
     checkCommandAvailability () {
       this.$v.form.command.$touch()

@@ -1,4 +1,4 @@
-import { Placeholder } from './models'
+import { Placeholder, CommandArgument } from './models'
 import config from '../config'
 import axios from 'axios'
 
@@ -9,7 +9,10 @@ class PlaceholderHelper {
         console.log(sender)
         return new Promise(resolve => resolve(sender['display-name']))
       }),
-      uptime: new Placeholder('uptime', function () {
+      uptime: new Placeholder('uptime', function (sender, sandbox) {
+        if (sandbox) {
+          return new Promise(resolve => resolve('1 saat 15 dakikadir'))
+        }
         return axios.get('https://api.twitch.tv/kraken/streams/' + config.channel, {
           headers: {
             'Client-ID': config.options.options.clientId
@@ -22,13 +25,15 @@ class PlaceholderHelper {
             let mins = diffInMinutes % 60
             let hours = Math.floor(diffInMinutes / 60)
             return hours + ' saat ' + mins + ' dakikadır'
+          } else {
+            return '0 dakikadir'
           }
-        })
+        }).catch(res => console.log('error', res))
       })
     }
   }
 
-  static renderCommandText (command, sender) {
+  static renderCommandText (command, sender, options) {
     if (!command) {
       return new Promise(resolve => undefined)
     }
@@ -45,13 +50,13 @@ class PlaceholderHelper {
         let candidate = placeholderCandidates[i]
         let key = candidate.replace('{{', '').replace('}}', '')
         if (key in placeholders) {
-          promises.push(placeholders[key].action(sender).then(res => {
+          promises.push(placeholders[key].action(sender, options.sandbox).then(res => {
             message = message.replace(candidate, res)
-          }))
+          }).catch(res => undefined))
         }
       }
     }
-    return Promise.all(promises).then(res => message)
+    return Promise.all(promises).then(res => message).catch(res => res)
   }
 
   static hasPlaceholder (message) {
@@ -70,6 +75,31 @@ class PlaceholderHelper {
   }
 }
 
+class CommandArgumentHelper {
+  static getArguments (cmdObj, message) {
+    let command = cmdObj.command
+    let cmdArguments = command.match(/\{\{([^\s]*)\}\}/gim)
+    let result = []
+    if (cmdArguments && message) {
+      let args = message.split(command)[1].trim().split(/\s*/)
+      for (var i = 0; i < cmdArguments.length; i++) {
+        var argument
+        var defaultValue
+        [argument, defaultValue] = cmdArguments[i].replace('{{', '').replace('}}', '').split(':')
+        if (i < args.length) {
+          if (args[i] && args[i] !== '') {
+            result.push(new CommandArgument(argument, args[i]))
+            continue
+          }
+        }
+        result.push(new CommandArgument(argument, defaultValue))
+      }
+    }
+    return result
+  }
+}
+
 export {
-  PlaceholderHelper
+  PlaceholderHelper,
+  CommandArgumentHelper
 }
