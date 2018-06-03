@@ -39,6 +39,14 @@ export default new Router({
       ]
     },
     {
+      path: '/plugins',
+      name: 'plugins',
+      component: require('@/components/PluginsPage').default,
+      meta: {
+        breadcrumb: 'Eklentiler'
+      }
+    },
+    {
       path: '*',
       redirect: '/'
     }
