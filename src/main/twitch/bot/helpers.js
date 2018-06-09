@@ -5,6 +5,10 @@ import axios from 'axios'
 class PlaceholderHelper {
   static getPlaceholders () {
     return {
+      spotify_current_track: new Placeholder('spotify_current_track', function (sender) {
+        // TODO: Check the permissions that current user have
+        // TODO: do a rest call to spotify api to get information
+      }),
       user: new Placeholder('user', function (sender) {
         console.log(sender)
         return new Promise(resolve => resolve(sender['display-name']))
