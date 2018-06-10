@@ -1,10 +1,40 @@
 import { Placeholder, CommandArgument } from './models'
 import config from '../config'
+import settings from 'electron-settings'
 import axios from 'axios'
 
 class PlaceholderHelper {
   static getPlaceholders () {
     return {
+      spotify_current_track: new Placeholder('spotify_current_track', function (sender) {
+        // TODO: Check the permissions that current user have
+        let spotifyAuthorizationInfo = settings.get('spotify_config', undefined)
+        if (spotifyAuthorizationInfo) {
+          return axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
+            headers: {
+              'Authorization': 'Bearer ' + spotifyAuthorizationInfo.access_token
+            }
+          }).then((res) => {
+            console.log('Currently Playing song', res.data)
+            if (res.data.is_playing) {
+              let singers = ''
+              for (var i = 0; i < res.data.item.artists.length; i++) {
+                let artist = res.data.item.artists[i]
+                singers += artist.name + ' '
+                if (i < res.data.item.artists.length - 1) {
+                  singers += '& '
+                }
+              }
+              return singers + '- ' + res.data.item.name
+            } else {
+              return 'None'
+            }
+          }).catch((err) => {
+            console.log('An error occured while trying to fetch information about currently playin song.', err.response.data)
+            return undefined
+          })
+        }
+      }),
       user: new Placeholder('user', function (sender) {
         console.log(sender)
         return new Promise(resolve => resolve(sender['display-name']))
