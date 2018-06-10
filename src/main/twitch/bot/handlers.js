@@ -3,7 +3,7 @@ import config from '../config'
 class CommandHandler {
   constructor () {
     this.commands = []
-    this.commandExtractionRegex = /!([^\s]*)\s*(.*)/gi
+    this.commandExtractionRegex = /^!(.*)?(\s|$)/mi
   }
 
   setCommands (commands) {
@@ -58,7 +58,7 @@ class CommandHandler {
 
   handleMessage (sender, message) {
     this.log('Handle Message: <Sender: ' + sender + ', Message: ' + message)
-    let matched = this.commandExtractionRegex.exec(message)
+    let matched = message.match(this.commandExtractionRegex)
     if (matched && matched[1]) {
       let commandName = matched[1]
       for (var i = 0; i < this.commands.length; i++) {
@@ -66,6 +66,7 @@ class CommandHandler {
         if (command.command.replace(/\{\{([^\s]*)\}\}/gim, '').trim() === commandName) {
           if (this.isCommandAvailableToUse(command) && this.isUserGrantedToUseCommand(sender, command)) {
             command.last_used_timestamp = Date.now()
+            this.log('This command("' + commandName + '") is able to use.')
             return command
           }
         }

@@ -8,6 +8,7 @@ class PlaceholderHelper {
     return {
       spotify_current_track: new Placeholder('spotify_current_track', function (sender) {
         // TODO: Check the permissions that current user have
+        // TODO: refresh access token
         let spotifyAuthorizationInfo = settings.get('spotify_config', undefined)
         if (spotifyAuthorizationInfo) {
           return axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
