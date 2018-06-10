@@ -9,6 +9,7 @@
 
 <script>
   import SystemInformation from './LandingPage/SystemInformation'
+  import { ipcRenderer } from 'electron'
 
   export default {
     name: 'landing-page',
@@ -20,6 +21,11 @@
           name: '!discord',
           action: { name: 'print', message: 'Print my discord link.' }
         }]
+      }
+    },
+    computed: {
+      spotifyAuthorizeURL () {
+        return ipcRenderer.sendSync('get_spotify_authorize_url')
       }
     },
     methods: {

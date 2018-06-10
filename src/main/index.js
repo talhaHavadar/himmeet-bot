@@ -1,7 +1,10 @@
 'use strict'
 
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { Himmeet, PlaceholderHelper, CommandArgumentHelper } from './twitch'
+import { Himmeet, PlaceholderHelper, CommandArgumentHelper, config } from './twitch'
+import settings from 'electron-settings'
+import axios from 'axios'
+import querystring from 'querystring'
 
 /**
  * Set `__static` path to static files in production
@@ -37,6 +40,7 @@ app.on('ready', () => {
   createWindow()
   let himmeet = new Himmeet()
   console.log(himmeet)
+  checkAuthorizationOfIntegrations()
   ipcMain.on('render_command_text', (e, command, sender, options) => {
     if (!command) {
       e.returnValue = ''
@@ -46,6 +50,39 @@ app.on('ready', () => {
       command.placeholders = CommandArgumentHelper.getArguments(command, sender.message.replace(/^!.*?(\s|$)/gmi, ''))
       PlaceholderHelper.renderCommandText(command, sender, options).then(res => {
         e.returnValue = res
+      })
+    }
+  })
+
+  ipcMain.on('get_spotify_authorize_url', (e) => {
+    e.returnValue = generateSpotifyAuthorizeInitializationURL()
+  })
+
+  ipcMain.on('is_spotify_authorized', (e) => {
+    e.returnValue = settings.get('spotify_config', undefined)
+  })
+
+  mainWindow.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl) {
+    if (!newUrl.startsWith('https://accounts.spotify.com/authorize') && newUrl.startsWith('http://localhost/spotify')) {
+      let code = newUrl.split('?')[1].split('code=')[1]
+      console.log(settings, code)
+      axios.post('https://accounts.spotify.com/api/token', querystring.stringify({ grant_type: 'authorization_code', code: code, redirect_uri: config.spotify.callback_url }), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + Buffer.from(config.spotify.clientId + ':' + config.spotify.client_secret).toString('base64')
+        }
+      }).then((response) => {
+        console.log('Result of post request:', response.data)
+        let spotifyConfigData = {
+          access_token: response.data.access_token,
+          refresh_token: response.data.refresh_token,
+          scopes: response.data.scope
+        }
+        settings.set('spotify_config', spotifyConfigData)
+        mainWindow.loadURL(winURL)
+      }).catch((err) => {
+        console.log('Error:', err.response)
+        mainWindow.loadURL(winURL)
       })
     }
   })
@@ -62,6 +99,29 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+function generateSpotifyAuthorizeInitializationURL () {
+  return 'https://accounts.spotify.com/authorize?client_id=' + config.spotify.clientId + '&response_type=code&scope=' + config.spotify.scopes + '&redirect_uri=' + config.spotify.callback_url
+}
+
+function checkAuthorizationOfIntegrations () {
+  let spotifyConfig = settings.get('spotify_config', undefined)
+  if (spotifyConfig) {
+    axios.post('https://accounts.spotify.com/api/token', querystring.stringify({ grant_type: 'refresh_token', refresh_token: spotifyConfig.refresh_token }), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + Buffer.from(config.spotify.clientId + ':' + config.spotify.client_secret).toString('base64')
+      }
+    }).then((response) => {
+      console.log('Spotify Refresh Token post request:', response.data)
+      spotifyConfig.access_token = response.data.access_token
+      spotifyConfig.scopes = response.data.scope
+      settings.set('spotify_config', spotifyConfig)
+    }).catch((err) => {
+      console.log('Spotify Refresh Token Error:', err.response)
+    })
+  }
+}
 
 /**
  * Auto Updater
