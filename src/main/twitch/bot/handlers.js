@@ -15,7 +15,7 @@ class CommandHandler {
   }
 
   isUserGrantedToUseCommand (user, command) {
-    if (user.badges.broadcaster === '1') {
+    if (user.badges && user.badges.broadcaster === '1') {
       return true
     }
     let userGroup = user.mod ? 'Moderators' : user.subscriber ? 'Subscribers' : 'Normal Users'
