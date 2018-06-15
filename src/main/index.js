@@ -76,7 +76,8 @@ app.on('ready', () => {
         let spotifyConfigData = {
           access_token: response.data.access_token,
           refresh_token: response.data.refresh_token,
-          scopes: response.data.scope
+          scopes: response.data.scope,
+          expires: Date.now() + (response.data.expires_in * 1000)
         }
         settings.set('spotify_config', spotifyConfigData)
         mainWindow.loadURL(winURL)
@@ -116,6 +117,7 @@ function checkAuthorizationOfIntegrations () {
       console.log('Spotify Refresh Token post request:', response.data)
       spotifyConfig.access_token = response.data.access_token
       spotifyConfig.scopes = response.data.scope
+      spotifyConfig.expires = Date.now() + (response.data.expires_in * 1000)
       settings.set('spotify_config', spotifyConfig)
     }).catch((err) => {
       console.log('Spotify Refresh Token Error:', err.response)
