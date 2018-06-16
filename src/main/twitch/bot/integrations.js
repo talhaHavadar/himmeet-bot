@@ -18,13 +18,14 @@ class SpotifyIntegration {
         spotifyConfig.scopes = response.data.scope
         spotifyConfig.expires = Date.now() + (response.data.expires_in * 1000)
         settings.set('spotify_config', spotifyConfig)
-        return Promise.resolve({
+        return {
           success: true,
-          message: 'Spotify token is refreshed'
-        })
+          message: 'Spotify token is refreshed',
+          access_token: response.data.access_token
+        }
       }).catch((err) => {
         console.log('Spotify Refresh Token Error:', err.response)
-        return Promise.reject(err)
+        return err
       })
     }
     return Promise.reject(new Error('Spotify integration must be done firstly to get a refresh token.'))
@@ -36,11 +37,12 @@ class SpotifyIntegration {
       let expirationTimeInMs = spotifyConfig.expires
       if (expirationTimeInMs === undefined || Date.now() > expirationTimeInMs) {
         // do a refresh call
-        SpotifyIntegration.refreshToken().then((res) => {
+        return SpotifyIntegration.refreshToken().then((res) => {
+          console.log('refresh result', res)
           if (res.success) {
             return axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
               headers: {
-                'Authorization': 'Bearer ' + spotifyConfig.access_token
+                'Authorization': 'Bearer ' + res.access_token
               }
             }).then((res) => {
               console.log('Currently Playing song', res.data)
@@ -63,7 +65,8 @@ class SpotifyIntegration {
             })
           }
         }).catch((err) => {
-          console.error(err)
+          console.error('An error occured while trying to refresh spotify access token.', err)
+          return err
         })
       } else {
         return axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
