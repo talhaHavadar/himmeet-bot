@@ -1,4 +1,6 @@
 import config from '../config'
+import settings from 'electron-settings'
+import { Ruffle } from './plugins/ruffle'
 
 class CommandHandler {
   constructor () {
@@ -75,6 +77,49 @@ class CommandHandler {
   }
 }
 
+class PluginHandler {
+  constructor () {
+    this.keywordExtractionRegex = /^!(.*)?(\s|$)/mi
+    this.activePlugins = {}
+  }
+
+  isPlugin (message) {
+    let matched = message.match(this.keywordExtractionRegex)
+    console.log('isPlugin-matched', matched)
+    if (matched && matched[1]) {
+      let keyword = matched[1]
+      let plugins = settings.get('plugins', [])
+      return plugins.find((plugin) => {
+        return plugin.keyword === keyword
+      }) !== undefined
+    } else {
+      return false
+    }
+  }
+
+  handlePlugin (message, userstate) {
+    let matched = message.match(this.keywordExtractionRegex)
+    if (matched && matched[1]) {
+      let keyword = matched[1]
+      let plugins = settings.get('plugins', [])
+      let plugin = plugins.find((plugin) => {
+        return plugin.keyword === keyword
+      })
+      console.log('userstate', userstate)
+      console.log(plugin)
+      if (plugin.type === 'ruffle') {
+        if (!this.activePlugins.hasOwnProperty(plugin.keyword)) {
+          var ruffle = new Ruffle(plugin)
+          this.activePlugins[ruffle.keyword] = ruffle
+        }
+        this.activePlugins[plugin.keyword].addCandidate(userstate['display-name'])
+        console.log('ruffle-pack', this.activePlugins[plugin.keyword].pack)
+      }
+    }
+  }
+}
+
 export {
-  CommandHandler
+  CommandHandler,
+  PluginHandler
 }

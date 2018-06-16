@@ -1,14 +1,15 @@
 import tmi from 'tmi.js'
 import config from '../config'
-import { CommandHandler } from './handlers'
+import { CommandHandler, PluginHandler } from './handlers'
 import { PlaceholderHelper, CommandArgumentHelper } from './helpers'
 import settings from 'electron-settings'
 import { ipcMain } from 'electron'
 import { setTimeout } from 'timers'
 
 export default class Himmeet {
-  constructor (commandHandler) {
+  constructor (commandHandler, pluginHandler) {
     this.commandHandler = commandHandler || new CommandHandler()
+    this.pluginHandler = pluginHandler || new PluginHandler()
     this.timeInMinutes = 0
     this.client = new tmi.client(config.options)
     this.client.connect()
@@ -28,6 +29,9 @@ export default class Himmeet {
         } else {
           this.client.action(channel, command.text)
         }
+      } else if (this.pluginHandler.isPlugin(message)) {
+        this.pluginHandler.handlePlugin(message, userstate)
+        console.log('Oww yea this message for your fancy plugin.')
       }
     })
 
