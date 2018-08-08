@@ -2,6 +2,7 @@
 
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { Himmeet, PlaceholderHelper, CommandArgumentHelper, config } from './twitch'
+import { Ruffle } from './twitch/bot/plugins/ruffle'
 import settings from 'electron-settings'
 import axios from 'axios'
 import querystring from 'querystring'
@@ -40,6 +41,7 @@ app.on('ready', () => {
   createWindow()
   let himmeet = new Himmeet()
   console.log(himmeet)
+  settings.set('plugins', [ new Ruffle() ])
   checkAuthorizationOfIntegrations()
   ipcMain.on('render_command_text', (e, command, sender, options) => {
     if (!command) {
